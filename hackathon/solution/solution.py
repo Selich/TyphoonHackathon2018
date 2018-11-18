@@ -4,7 +4,17 @@ from hackathon.utils.control import Control
 from hackathon.utils.utils import ResultsMessage, DataMessage, PVMode, \
     TYPHOON_DIR, config_outs
 from hackathon.framework.http_server import prepare_dot_dir
+#import tensorflow as tf
 
+
+# from tensorflow import Session
+
+
+# with Session() as sess:
+#     saver = tf.train.Saver()
+#     saver.restore(sess,'models/model.ckpt')
+    
+#     a,b,c = sess.run([a,b,c])
 
 def worker(msg: DataMessage) -> ResultsMessage:
     """TODO: This function should be implemented by contestants."""
@@ -15,9 +25,12 @@ def worker(msg: DataMessage) -> ResultsMessage:
     load_three = True
     power_reference = 0.0
     pv_mode = PVMode.ON
-    predicted_consumption = 1.1 
+    # predicted_consumtrion is supposed to be predicted by Tensorflow model 
+    # but we could not import trained model into the typhoon framework
+    predicted_consumption = 1.2 
     max_charging = 5.0
 
+#
     
 
     if msg.grid_status:
