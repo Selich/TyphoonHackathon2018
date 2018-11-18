@@ -15,31 +15,35 @@ def worker(msg: DataMessage) -> ResultsMessage:
     load_three = True
     power_reference = 0.0
     pv_mode = PVMode.ON
+    predicted_consumption = 1.1 
+    max_charging = 5.0
 
-    # if msg.grid_status:
-    #     if msg.bessSOC != 1 and msg.buying_price == msg.selling_price \
-    #             and msg.current_load <8:
-    #         if msg.bessSOC > 0.45:
-    #             power_reference = -5.0
-    #     elif msg.current_load > 8:
-    #         power_reference = msg.current_load
-    #
-    # else:
-    #     if msg.bessSOC == 1 and msg.solar_production > 0:
-    #         if msg.solar_production < msg.current_load:
-    #             power_reference = msg.current_load
-    #             load_three = False
-    #             pv_mode = PVMode.OFF
-    #         else:
-    #             power_reference = msg.current_load
-    #     elif msg.bessSOC != 1:
-    #         load_three = False
-    #         pv_mode = PVMode.ON
-    #
-    #     elif msg.selling_price == msg.buying_price and msg.solar_production == 0:
-    #         power_reference = msg.current_load
+    
 
-    # Dummy result is returned in every cycle here
+    if msg.grid_status:
+        if msg.bessSOC < 1 and msg.buying_price == msg.selling_price and msg.id < 7000:
+            power_reference = -max_charging
+            msg.mainGridPower = msg.current_load + max_charging - msg.solar_production
+        elif (msg.bessSOC * 20) > (predicted_consumption * 1.5) and msg.buying_price == 8.0:
+            power_reference = max_charging
+            msg.mainGridPower = msg.current_load - max_charging - msg.solar_production
+
+        
+        if msg.solar_production > msg.current_load and msg.buying_price == 3.0:
+            msg.mainGridPower = msg.current_load - msg.solar_production
+        elif msg.solar_production > msg.current_load:
+            power_reference = msg.current_load - msg.solar_production
+        
+    else:
+        pv_mode = PVMode.OFF
+        if msg.current_load < msg.solar_production and msg.bessSOC == 1:
+            power_reference = max_charging
+        
+        if msg.current_load > (max_charging + msg.solar_production):
+            load_three = False
+            if msg.current_load > (max_charging + msg.solar_production):
+                load_two = False
+
     return ResultsMessage(data_msg=msg,
                           load_one=load_one,
                           load_two=load_two,
